@@ -1,0 +1,67 @@
+import { getMetadataArgsStorage } from '../tools/getMetadataArgsStorage.js';
+import { type Constructable } from '../types.js';
+import { type Constraint } from './Constraint.js';
+import { MetadataProperty } from './MetadataProperty.js';
+
+export class Metadata {
+  public readonly constraints: readonly Constraint[];
+
+  public readonly properties: readonly MetadataProperty[];
+
+  public readonly aliases = new Map<PropertyKey, PropertyKey[]>();
+
+  public readonly target: Constructable;
+
+  public get name() {
+    return this.target.name;
+  }
+
+  constructor(target: Constructable) {
+    const args = getMetadataArgsStorage();
+
+    if (!args.guards.some(_guard => _guard.target === target))
+      throw new TypeError();
+
+    this.target = target;
+
+    this.constraints = args.constraints
+      .filter(
+        args =>
+          (target === args.target || target.prototype instanceof args.target) &&
+          !args.propertyKey,
+      )
+      .map(args => args.constraint);
+
+    const properties = args.constraints
+      .filter(
+        args =>
+          (target === args.target || target.prototype instanceof args.target) &&
+          !!args.propertyKey,
+      )
+      .map(args => args.propertyKey!);
+
+    args.aliases
+      .filter(
+        args =>
+          target === args.target || target.prototype instanceof args.target,
+      )
+      .forEach(args => {
+        if (!this.aliases.has(args.propertyKey))
+          this.aliases.set(args.propertyKey, []);
+
+        this.aliases.get(args.propertyKey)!.push(args.alias);
+      });
+
+    this.properties = Array.from(new Set(properties)).map(
+      propertyKey => new MetadataProperty(target, propertyKey),
+    );
+  }
+}
+
+export interface Metadata extends OrnateGuard.Metadata {}
+
+declare global {
+  namespace OrnateGuard {
+    interface Metadata {}
+  }
+}
