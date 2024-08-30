@@ -113,8 +113,14 @@ export class IsRecordConstraint extends Constraint {
     }
 
     if (promises.length)
-      return Promise.all(promises).then(() => (context.value = record));
-    else context.value = record;
+      return Promise.all(promises).then(() => {
+        if (context.isRoot) Object.assign(context.target, record);
+        context.value = record;
+      });
+    else {
+      if (context.isRoot) Object.assign(context.target, record);
+      context.value = record;
+    }
   }
 }
 

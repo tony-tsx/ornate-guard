@@ -92,7 +92,6 @@ export function purify(
 
     const promises: Array<Promise<unknown>> = [];
 
-    // @ts-expect-error: TODO
     normalize(configuration.constraint).execute(context, promise => {
       promises.push(promise);
     });
@@ -107,8 +106,8 @@ export function purify(
             };
           else throw createValidationErrorFromContext(context);
         else if (configuration.safe)
-          return { status: 'fulfilled', value: context.target };
-        else return context.target;
+          return { status: 'fulfilled', value: context.value };
+        else return context.value;
       }) as PurifyOutput<Record<PropertyKey, unknown>, boolean, boolean>;
     else if (hasErrorInContext(context))
       if (configuration.safe)
@@ -118,8 +117,8 @@ export function purify(
         };
       else throw createValidationErrorFromContext(context);
     else if (configuration.safe)
-      return { status: 'fulfilled', value: context.target };
-    else return context.target;
+      return { status: 'fulfilled', value: context.value };
+    else return context.value;
   }
 
   // eslint-disable-next-line new-cap
@@ -131,6 +130,7 @@ export function purify(
   const raw = configuration.input;
   const path = configuration.path;
   const context: Context = {
+    isRoot: true,
     share: configuration.share,
     target,
     // @ts-expect-error: TODO
