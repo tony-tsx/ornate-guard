@@ -15,6 +15,9 @@ export interface IsStringOptions<TCoerce extends true | false = false> {
   endsWith?: string | string[];
   notStartsWith?: string | string[];
   notEndsWith?: string | string[];
+  trim?: boolean;
+  trimStart?: boolean;
+  trimEnd?: boolean;
 }
 
 export class IsStringConstraint<
@@ -30,6 +33,9 @@ export class IsStringConstraint<
   public readonly endsWith?: string | string[];
   public readonly notStartsWith?: string | string[];
   public readonly notEndsWith?: string | string[];
+  public readonly trim?: boolean;
+  public readonly trimStart?: boolean;
+  public readonly trimEnd?: boolean;
 
   constructor(options: IsStringOptions<TCoerce>) {
     super();
@@ -55,6 +61,12 @@ export class IsStringConstraint<
 
     if (options.notEndsWith !== undefined)
       this.notEndsWith = options.notEndsWith;
+
+    if (options.trim !== undefined) this.trim = options.trim;
+
+    if (options.trimStart !== undefined) this.trimStart = options.trimStart;
+
+    if (options.trimEnd !== undefined) this.trimEnd = options.trimEnd;
   }
 
   public parse(context: Context): unknown {
@@ -62,6 +74,12 @@ export class IsStringConstraint<
 
     if (typeof context.value !== 'string')
       return context.issues.push(this.issue(`Must be string`));
+
+    if (this.trim) context.value = context.value.trim();
+
+    if (this.trimStart) context.value = context.value.trimStart();
+
+    if (this.trimEnd) context.value = context.value.trimEnd();
 
     if (this.min !== undefined && context.value.length < this.min)
       context.issues.push(
