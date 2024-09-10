@@ -5,6 +5,7 @@ import {
   type ExtractConstraintInput,
 } from '../types.js';
 import { Is } from './Is.js';
+import { IsGuard } from './IsGuard.js';
 import { Use } from './Use.js';
 
 export type IsObjectShapeInput<
@@ -26,6 +27,7 @@ export function IsObject<TShape extends Record<PropertyKey, ConstraintType>>(
   Use.Type.Property
 > {
   // eslint-disable-next-line @typescript-eslint/no-extraneous-class
+  @IsGuard
   class Prototype {}
 
   Object.entries(shape).forEach(([key, constraint]) => {
