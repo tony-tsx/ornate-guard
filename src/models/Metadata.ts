@@ -12,6 +12,10 @@ export class Metadata {
 
   public readonly target: Constructable;
 
+  public readonly discriminatorProperty: string | symbol | undefined;
+
+  public readonly discriminatorValue: unknown | undefined;
+
   public get name() {
     return this.target.name;
   }
@@ -19,10 +23,15 @@ export class Metadata {
   constructor(target: Constructable) {
     const args = getMetadataArgsStorage();
 
-    if (!args.guards.some(_guard => _guard.target === target))
-      throw new TypeError();
+    const arg = args.guards.find(_guard => _guard.target === target);
+
+    if (!arg) throw new TypeError();
 
     this.target = target;
+
+    this.discriminatorProperty = arg.discriminatorProperty;
+
+    this.discriminatorValue = arg.discriminatorValue;
 
     this.constraints = args.constraints
       .filter(

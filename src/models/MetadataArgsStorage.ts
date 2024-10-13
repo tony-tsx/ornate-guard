@@ -1,34 +1,34 @@
-import { type Constructable } from '../types.js';
+import { type GuardOptions } from '../decorators/IsGuard.js';
+import { type Class } from '../types.js';
 import { type Constraint } from './Constraint.js';
 
-export interface IMetadataGuardArgs {
-  target: Constructable;
+export interface IMetadataGuardArgs extends GuardOptions {
+  target: Class;
 }
 
 export interface IMetadataConstraintArgs {
-  target: Constructable;
-  constraint: Constraint;
-
+  target: Class;
   propertyKey: PropertyKey | undefined;
+  constraint: Constraint;
 }
 
 export interface IMetadataNullableArgs {
-  target: Constructable;
+  target: Class;
   propertyKey: PropertyKey;
 }
 
 export interface IMetadataOptionalArgs {
-  target: Constructable;
+  target: Class;
   propertyKey: PropertyKey;
 }
 
 export interface IMetadataAnyArgs {
-  target: Constructable;
+  target: Class;
   propertyKey: PropertyKey;
 }
 
 export interface IMetadataAliasArgs {
-  target: Constructable;
+  target: Class;
   propertyKey: PropertyKey;
   alias: string;
 }

@@ -6,11 +6,11 @@ const ORNATE_GUARD_METADATA = Symbol.for('ornate-guard:metadata');
 export function getMetadata<T extends object>(
   schema: Constructable<T>,
 ): Metadata {
-  if (ORNATE_GUARD_METADATA in schema)
-    return schema[ORNATE_GUARD_METADATA] as Metadata;
+  if (ORNATE_GUARD_METADATA in schema) {
+    const metadata = schema[ORNATE_GUARD_METADATA] as Metadata;
 
-  // eslint-disable-next-line new-cap, no-new
-  new schema();
+    if (metadata.target === schema) return metadata;
+  }
 
   Object.defineProperty(schema, ORNATE_GUARD_METADATA, {
     value: new Metadata(schema),

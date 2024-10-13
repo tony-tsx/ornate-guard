@@ -5,7 +5,7 @@ export class Issue {
 
   constructor(
     public readonly message: string,
-    public readonly constraint: Constraint,
+    public readonly constraint?: Constraint,
   ) {}
 }
 

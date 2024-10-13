@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-throw-literal */
 import { type Context } from './models/Context.js';
-import { type ValidationError } from './models/ValidationError.js';
+import { Issue } from './models/Issue.js';
+import { ValidationError } from './models/ValidationError.js';
 import { createValidationErrorFromContext } from './tools/createValidationErrorFromContext.js';
 import { getMetadata } from './tools/getMetadata.js';
+import { getMetadataArgsStorage } from './tools/getMetadataArgsStorage.js';
 import { hasErrorInContext } from './tools/hasErrorInContext.js';
 import { isConstraint } from './tools/isConstraint.js';
 import { normalize } from './tools/normalize.js';
@@ -73,7 +75,7 @@ export function purify(
     Record<PropertyKey, unknown>,
     boolean,
     boolean,
-    Record<PropertyKey, unknown> | Array<Record<PropertyKey, unknown>>
+    Record<PropertyKey, unknown>
   >,
 ): PurifyOutput<Record<PropertyKey, unknown>, boolean, boolean> {
   if (isConstraint(configuration.constraint)) {
@@ -121,10 +123,55 @@ export function purify(
     else return context.value;
   }
 
+  const metadata = getMetadata(configuration.constraint)!;
+
+  if (metadata.discriminatorProperty) {
+    const discriminator = configuration.input[metadata.discriminatorProperty];
+
+    const guard = getMetadataArgsStorage().guards.find(guard => {
+      if (Reflect.getPrototypeOf(guard.target) !== configuration.constraint)
+        return false;
+
+      return guard.discriminatorValue === discriminator;
+    });
+
+    if (!guard) {
+      const err = new ValidationError({
+        target: Object.create(configuration.constraint.prototype),
+        origin: configuration.input,
+        value: configuration.input,
+        path: configuration.path,
+        inners: [
+          new ValidationError({
+            target: configuration.input,
+            origin: configuration.input,
+            value: configuration.input,
+            inners: [],
+            issues: [new Issue('Missing')],
+            path: configuration.path.concat(metadata.discriminatorProperty),
+          }),
+        ],
+        issues: [],
+      });
+
+      if (configuration.safe) return { status: 'rejected', reason: err };
+
+      throw err;
+    }
+
+    return purify({
+      constraint: guard.target as Constructable,
+      async: configuration.async,
+      flags: configuration.flags,
+      input: configuration.input,
+      path: configuration.path,
+      safe: configuration.safe,
+      share: configuration.share,
+    });
+  }
+
   // eslint-disable-next-line new-cap
   const target = new configuration.constraint();
-
-  const metadata = getMetadata(configuration.constraint)!;
 
   const promises: Array<Promise<unknown>> = [];
   const raw = configuration.input;
@@ -133,7 +180,6 @@ export function purify(
     isRoot: true,
     share: configuration.share,
     target,
-    // @ts-expect-error: TODO
     origin: raw,
     value: raw,
     flags: configuration.flags,
@@ -155,17 +201,14 @@ export function purify(
 
     const defaultValue = target[property.propertyKey];
 
-    // @ts-expect-error: TODO
     let raw = configuration.input[property.propertyKey];
 
     if (raw === undefined && metadata.aliases.has(property.propertyKey)) {
       const aliases = metadata.aliases.get(property.propertyKey)!;
 
       for (const alias of aliases) {
-        // @ts-expect-error: TODO
         if (configuration.input[alias] === undefined) continue;
 
-        // @ts-expect-error: TODO
         raw = configuration.input[alias];
 
         break;

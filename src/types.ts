@@ -6,6 +6,8 @@ import { type Issue } from './models/Issue.js';
 
 export const IS_CONSTRAINT_REF = Symbol('todo:is-constraint-reference');
 
+export type Class<T = any> = abstract new (...args: any[]) => T;
+
 export type Constructable<T = any> = new (...args: any[]) => T;
 
 export type AnyRecord = Record<PropertyKey, unknown>;
