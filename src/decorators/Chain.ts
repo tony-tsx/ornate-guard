@@ -36,6 +36,8 @@ export class ChainConstraint<TInput, TOutput> extends Constraint<
           // eslint-disable-next-line @typescript-eslint/no-misused-promises, @typescript-eslint/promise-function-async
           p => (promise = p),
         );
+
+    return promise
   }
 }
 
