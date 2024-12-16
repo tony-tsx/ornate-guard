@@ -2,8 +2,12 @@
 import { type ValidationError } from './ValidationError.js';
 import { type Issue } from './Issue.js';
 
+export interface ContextShare {
+  [key: PropertyKey]: any
+}
+
 export interface Context<TValue = any> {
-  readonly share: Record<PropertyKey, any>;
+  readonly share: ContextShare;
 
   _?: ValidationError;
 
