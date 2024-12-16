@@ -2,7 +2,7 @@ import { Constraint } from '../models/Constraint.js';
 import { type Context } from '../models/Context.js';
 import { Use } from './Use.js';
 
-export class IsUUIDV1Constraint extends Constraint {
+export class IsUUIDV1Constraint extends Constraint<any, string> {
   public static readonly REG_EXP =
     /^[0-9A-F]{8}-[0-9A-F]{4}-1[0-9A-F]{3}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
 
@@ -15,7 +15,7 @@ export class IsUUIDV1Constraint extends Constraint {
   }
 }
 
-export class IsUUIDV2Constraint extends Constraint {
+export class IsUUIDV2Constraint extends Constraint<any, string> {
   public static readonly REG_EXP =
     /^[0-9A-F]{8}-[0-9A-F]{4}-2[0-9A-F]{3}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
 
@@ -28,7 +28,7 @@ export class IsUUIDV2Constraint extends Constraint {
   }
 }
 
-export class IsUUIDV3Constraint extends Constraint {
+export class IsUUIDV3Constraint extends Constraint<any, string> {
   public static readonly REG_EXP =
     /^[0-9A-F]{8}-[0-9A-F]{4}-3[0-9A-F]{3}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
 
@@ -41,7 +41,7 @@ export class IsUUIDV3Constraint extends Constraint {
   }
 }
 
-export class IsUUIDV4Constraint extends Constraint {
+export class IsUUIDV4Constraint extends Constraint<any, string> {
   public static readonly REG_EXP =
     /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
 
@@ -54,7 +54,7 @@ export class IsUUIDV4Constraint extends Constraint {
   }
 }
 
-export class IsUUIDV5Constraint extends Constraint {
+export class IsUUIDV5Constraint extends Constraint<any, string> {
   public static readonly REG_EXP =
     /^[0-9A-F]{8}-[0-9A-F]{4}-5[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
 
@@ -67,7 +67,7 @@ export class IsUUIDV5Constraint extends Constraint {
   }
 }
 
-export class IsUUIDConstraint extends Constraint {
+export class IsUUIDConstraint extends Constraint<any, string> {
   public static readonly REG_EXP =
     /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
 
@@ -95,6 +95,6 @@ export function IsUUID(version?: 'v1' | 'v2' | 'v3' | 'v4' | 'v5') {
     case undefined:
       return Use(new IsUUIDConstraint());
     default:
-      throw new Error(`Invalid uuid version ${String(version)}`);
+      throw new TypeError(`Invalid uuid version ${String(version)}`);
   }
 }
