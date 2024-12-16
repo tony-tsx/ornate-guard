@@ -8,6 +8,13 @@ export abstract class Transform<
 > extends Constraint<TInput, TOutput> {
   public abstract transform(input: TInput): TOutput | Promise<TOutput>;
 
+  public static toArray() {
+    return this.with((value: unknown) => {
+      if (Array.isArray(value)) return value;
+      return [value];
+    });
+  }
+
   public static with<TInput, TOutput>(
     transform: (input: TInput) => TOutput | Promise<TOutput>,
   ): Transform<TInput, TOutput> {
