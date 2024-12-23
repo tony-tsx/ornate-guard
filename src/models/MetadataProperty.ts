@@ -1,5 +1,5 @@
 import { getMetadataArgsStorage } from '../tools/getMetadataArgsStorage.js';
-import { type Constructable } from '../types.js';
+import { type Class, type Constructable } from '../types.js';
 import { type Constraint } from './Constraint.js';
 
 export class MetadataProperty {
@@ -10,8 +10,9 @@ export class MetadataProperty {
   public readonly optional: boolean;
 
   constructor(
-    public target: Constructable,
-    public propertyKey: PropertyKey,
+    public readonly target: Constructable,
+    public readonly propertyKey: PropertyKey,
+    public readonly origin: Class,
   ) {
     this.constraints = getMetadataArgsStorage()
       .constraints.filter(

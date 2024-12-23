@@ -41,13 +41,11 @@ export class Metadata {
       )
       .map(args => args.constraint);
 
-    const properties = args.constraints
-      .filter(
-        args =>
-          (target === args.target || target.prototype instanceof args.target) &&
-          !!args.propertyKey,
-      )
-      .map(args => args.propertyKey!);
+    const properties = args.constraints.filter(
+      args =>
+        (target === args.target || target.prototype instanceof args.target) &&
+        !!args.propertyKey,
+    );
 
     args.aliases
       .filter(
@@ -62,7 +60,7 @@ export class Metadata {
       });
 
     this.properties = Array.from(new Set(properties)).map(
-      propertyKey => new MetadataProperty(target, propertyKey),
+      arg => new MetadataProperty(target, arg.propertyKey!, arg.target),
     );
   }
 }
