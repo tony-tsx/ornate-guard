@@ -20,6 +20,7 @@ export * from './decorators/IsObject.js';
 export * from './decorators/IsOptional.js';
 export * from './decorators/IsRecord.js';
 export * from './decorators/IsString.js';
+export * from './decorators/IsTuple.js';
 export * from './decorators/IsUUID.js';
 export * from './decorators/Lazy.js';
 export * from './decorators/Union.js';
