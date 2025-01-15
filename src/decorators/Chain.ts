@@ -14,14 +14,13 @@ export class ChainConstraint<TInput, TOutput> extends Constraint<
     super();
   }
 
-  public parse(context: Context) {
+  public async parse(context: Context) {
     let promise: Promise<unknown> | undefined;
 
     for (const constraint of this.constraints)
       if (promise)
         promise = promise.then(() => {
           if (context.issues.length) return;
-
           if (context.inners.length) return;
 
           constraint.execute(
@@ -30,6 +29,8 @@ export class ChainConstraint<TInput, TOutput> extends Constraint<
             p => (promise = p),
           );
         });
+      else if (context.issues.length) return promise;
+      else if (context.inners.length) return promise;
       else
         constraint.execute(
           context,
@@ -37,7 +38,7 @@ export class ChainConstraint<TInput, TOutput> extends Constraint<
           p => (promise = p),
         );
 
-    return promise
+    return await promise;
   }
 }
 
