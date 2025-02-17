@@ -1,3 +1,4 @@
+/* eslint-disable no-labels */
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 import { Constraint } from '../models/Constraint.js';
 import { type Context } from '../models/Context.js';
@@ -11,6 +12,7 @@ export class IsMapConstraint extends Constraint {
   constructor(
     public readonly value: Constraint,
     public readonly key?: Constraint,
+    public readonly options?: IsMapOptions,
   ) {
     super();
   }
@@ -21,6 +23,14 @@ export class IsMapConstraint extends Constraint {
 
     if (context.value === null)
       return context.issues.push(this.issue('Must be a map'));
+
+    context.value = (() => {
+      if (context.value instanceof Map) return context.value;
+
+      if (Array.isArray(context.value)) return new Map(context.value);
+
+      return new Map(Object.entries(context.value));
+    })();
 
     if (!(context.value instanceof Map))
       return context.issues.push(this.issue('Must be a map'));
@@ -112,22 +122,29 @@ export class IsMapConstraint extends Constraint {
   }
 }
 
+export interface IsMapOptions {
+  coerce?: boolean;
+}
+
 export function IsMap(
   value: ConstraintType,
 ): Use<IsMapConstraint, Use.Type.Property>;
 export function IsMap(
   key: ConstraintType,
   value: ConstraintType,
+  options?: IsMapOptions,
 ): Use<IsMapConstraint, Use.Type.Property>;
 export function IsMap(
   keyOrValueConstraint: ConstraintType,
   maybeValueConstraint?: ConstraintType,
+  options?: IsMapOptions,
 ) {
   if (maybeValueConstraint)
     return Use<IsMapConstraint, Use.Type.Property>(
       new IsMapConstraint(
         normalize(maybeValueConstraint),
         normalize(keyOrValueConstraint),
+        options,
       ),
     );
   return Use<IsMapConstraint, Use.Type.Property>(
