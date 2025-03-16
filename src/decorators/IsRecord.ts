@@ -4,13 +4,31 @@ import { type Context } from '../models/Context.js';
 import { createValidationErrorFromContext } from '../tools/createValidationErrorFromContext.js';
 import { hasErrorInContext } from '../tools/hasErrorInContext.js';
 import { normalize } from '../tools/normalize.js';
-import { type AnyConstraintType } from '../types.js';
+import {
+  type ExtractConstraintInput,
+  type ExtractConstraintOutput,
+  type AnyConstraintType,
+  type ConstraintTypeToConstraint,
+  type AnyConstraint,
+} from '../types.js';
 import { Use } from './Use.js';
 
-export class IsRecordConstraint extends Constraint {
+export class IsRecordConstraint<
+  TKeyConstraint extends Constraint | null,
+  TValueConstraint extends Constraint,
+> extends Constraint<
+  Record<
+    ExtractConstraintInput<TKeyConstraint> & (string | number | symbol),
+    ExtractConstraintInput<TValueConstraint>
+  >,
+  Record<
+    ExtractConstraintOutput<TKeyConstraint> & (string | number | symbol),
+    ExtractConstraintOutput<TValueConstraint>
+  >
+> {
   constructor(
-    public readonly value: Constraint,
-    public readonly key?: Constraint,
+    public readonly key: TKeyConstraint | null,
+    public readonly value: TValueConstraint,
   ) {
     super();
   }
@@ -124,23 +142,39 @@ export class IsRecordConstraint extends Constraint {
   }
 }
 
-export function IsRecord<TType extends Use.Type = Use.Type.Any>(
-  value: AnyConstraintType,
-): Use<IsRecordConstraint, TType>;
-export function IsRecord<TType extends Use.Type = Use.Type.Any>(
-  key: AnyConstraintType,
-  value: AnyConstraintType,
-): Use<IsRecordConstraint, TType>;
+export function IsRecord<
+  TValueConstraintType extends AnyConstraintType,
+  TType extends Use.Type = Use.Type.Any,
+>(
+  value: TValueConstraintType,
+): Use<
+  IsRecordConstraint<null, ConstraintTypeToConstraint<TValueConstraintType>>,
+  TType
+>;
+export function IsRecord<
+  TKeyConstraintType extends AnyConstraintType,
+  TValueConstraintType extends AnyConstraintType,
+  TType extends Use.Type = Use.Type.Any,
+>(
+  key: TKeyConstraintType,
+  value: TValueConstraintType,
+): Use<
+  IsRecordConstraint<
+    ConstraintTypeToConstraint<TKeyConstraintType>,
+    ConstraintTypeToConstraint<TValueConstraintType>
+  >,
+  TType
+>;
 export function IsRecord<TType extends Use.Type = Use.Type.Any>(
   keyOrValueConstraintRef: AnyConstraintType,
   maybeValueConstraint?: AnyConstraintType,
-): Use<IsRecordConstraint, TType> {
-  if (maybeValueConstraint)
-    return Use(
-      new IsRecordConstraint(
-        normalize(maybeValueConstraint),
-        normalize(keyOrValueConstraintRef),
-      ),
-    );
-  return Use(new IsRecordConstraint(normalize(keyOrValueConstraintRef)));
+): Use<IsRecordConstraint<AnyConstraint, AnyConstraint>, TType> {
+  return Use(
+    new IsRecordConstraint(
+      maybeValueConstraint ? normalize(keyOrValueConstraintRef) : null,
+      maybeValueConstraint
+        ? normalize(maybeValueConstraint)
+        : normalize(keyOrValueConstraintRef),
+    ),
+  );
 }
